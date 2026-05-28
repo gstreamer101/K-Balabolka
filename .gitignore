@@ -37,3 +37,6 @@ venv/
 
 # 개인 문서 (개발일지 + 사용가이드 등 — GitHub에 올리지 않음)
 docs/
+
+# 외부 참고 자산 (윈도우 Balabolka UI 스크린샷 등 — 저작권 회피)
+balabolka_ui.img
