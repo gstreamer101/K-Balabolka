@@ -83,7 +83,8 @@ mac_tts_shutdown (mac_tts_ctx *ctx)
 }
 
 int
-mac_tts_speak (mac_tts_ctx *ctx, const char *utf8_text)
+mac_tts_speak (mac_tts_ctx *ctx, const char *utf8_text,
+               const mac_tts_options *opts)
 {
   if (!ctx || !utf8_text) {
     return -1;
@@ -96,7 +97,32 @@ mac_tts_speak (mac_tts_ctx *ctx, const char *utf8_text)
     }
 
     AVSpeechUtterance *utterance = [AVSpeechUtterance speechUtteranceWithString:text];
-    /* Defaults: system voice for current locale, default rate/pitch. */
+
+    /* AVSpeech의 didFinishSpeechUtterance: 콜백이 audio buffer flush보다
+     * 먼저 호출되는 경우가 있어 마지막 음절(특히 한국어 받침)이 잘림.
+     * postUtteranceDelay로 콜백을 늦춰 audio가 완전히 끝날 시간을 확보. */
+    utterance.postUtteranceDelay = 0.25;
+
+    if (opts) {
+      utterance.rate            = opts->rate;
+      utterance.pitchMultiplier = opts->pitch;
+      utterance.volume          = opts->volume;
+
+      if (opts->voice_id && opts->voice_id[0] != '\0') {
+        NSString *vid = [NSString stringWithUTF8String:opts->voice_id];
+        if (vid) {
+          /* identifier (dotted form) 우선, 실패 시 language code로 fallback */
+          AVSpeechSynthesisVoice *voice =
+              [AVSpeechSynthesisVoice voiceWithIdentifier:vid];
+          if (!voice) {
+            voice = [AVSpeechSynthesisVoice voiceWithLanguage:vid];
+          }
+          if (voice) {
+            utterance.voice = voice;
+          }
+        }
+      }
+    }
 
     [handle.delegate.cond lock];
     handle.delegate.done = NO;
