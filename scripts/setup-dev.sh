@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 dlgus8648
 #
-# K-Balabolka 개발 환경 자동 설정 스크립트
+# AnnoySpeaker 개발 환경 자동 설정 스크립트
 #
 # 사전 체크 → plugin 빌드 → GUI venv + pip install → export 도구 빌드를
 # 한 번에 수행합니다. BUILD.md의 절차를 그대로 코드로 옮긴 것입니다.
@@ -288,7 +288,7 @@ fi
 
 echo
 echo "${C_BOLD}${C_GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C_RESET}"
-echo "${C_BOLD}${C_GREEN} K-Balabolka 개발 환경 준비 완료${C_RESET}"
+echo "${C_BOLD}${C_GREEN} AnnoySpeaker 개발 환경 준비 완료${C_RESET}"
 echo "${C_BOLD}${C_GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C_RESET}"
 echo
 echo "다음 명령으로 빠른 동작 확인:"

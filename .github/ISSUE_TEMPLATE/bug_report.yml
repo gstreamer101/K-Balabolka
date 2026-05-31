@@ -1,5 +1,5 @@
 name: 버그 리포트
-description: K-Balabolka의 버그를 신고합니다.
+description: AnnoySpeaker의 버그를 신고합니다.
 title: "[Bug] "
 labels: ["bug"]
 body:

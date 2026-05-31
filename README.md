@@ -1,9 +1,11 @@
-# K-Balabolka
+# AnnoySpeaker
 
-Windows용 텍스트 음성 변환 리더 [Balabolka](https://www.cross-plus-a.com/balabolka.htm)의 비공식 macOS 구현. macOS 시스템 음성 합성(AVSpeechSynthesizer)을 GStreamer 파이프라인 위에서 활용하는 데스크톱 애플리케이션입니다.
+macOS용 텍스트 음성 변환 리더. macOS 시스템 음성 합성(AVSpeechSynthesizer)을 GStreamer 파이프라인 위에서 활용하는 데스크톱 애플리케이션입니다. Windows용 [Balabolka](https://www.cross-plus-a.com/balabolka.htm)에서 영감을 받았습니다.
 
 > **⚠️ 원작과의 관계 (비제휴 고지)**
-> 본 프로젝트는 독립적인 비공식 macOS 구현이며, 원작 Balabolka 및 그 저작자(Ilya Morozov)와 **제휴하거나 승인받은 관계가 아닙니다.** "Balabolka"라는 명칭은 원 저작자의 것이며, 원작은 <https://www.cross-plus-a.com/balabolka.htm> 에서 확인할 수 있습니다.
+> 본 프로젝트는 Windows용 텍스트 음성 변환 리더 Balabolka에서 영감을 받은 독립 프로젝트이며, 원작 및 그 저작자(Ilya Morozov)와 **제휴하거나 승인받은 관계가 아닙니다.** 코드는 처음부터 독립적으로 작성되었습니다. 원작은 <https://www.cross-plus-a.com/balabolka.htm> 에서 확인할 수 있습니다.
+>
+> **명칭의 유래:** "Балаболка"(Balabolka)는 러시아어로 "쉴 새 없이 떠드는 사람 / 수다쟁이"라는 뜻입니다. **AnnoySpeaker**라는 이름은 그 어원의 자조적 뉘앙스를 영어로 옮긴 오마주입니다 — 원작에 대한 존중을 의미로 유지하면서도, 명칭 자체는 독립적입니다.
 
 ---
 
@@ -32,8 +34,8 @@ brew install meson ninja python@3.12
 ### 2) 저장소 가져오기
 
 ```bash
-git clone https://github.com/gstreamer101/K-Balabolka.git
-cd K-Balabolka
+git clone https://github.com/gstreamer101/AnnoySpeaker.git
+cd AnnoySpeaker
 ```
 
 ### 3) `macttssink` GStreamer 플러그인 빌드
@@ -59,7 +61,7 @@ pip install -r requirements.txt
 GST_PLUGIN_PATH="$(pwd)/../plugin/builddir" python main.py
 ```
 
-K-Balabolka 윈도우가 뜨면 텍스트박스에 한국어/영어를 입력하고 "재생"을 눌러보세요.
+AnnoySpeaker 윈도우가 뜨면 텍스트박스에 한국어/영어를 입력하고 "재생"을 눌러보세요.
 
 ### 5) (옵션) m4a 내보내기 도구 빌드
 
@@ -158,5 +160,5 @@ echo "안녕하세요, 케이 발라볼카 입니다" | \
 ## 참고 / 감사
 
 - **원작**: [Balabolka](https://www.cross-plus-a.com/balabolka.htm) by Ilya Morozov (Windows).
-- **설계 참고**: [avstack/gst-ttssink](https://github.com/avstack/gst-ttssink) — Rust 기반 cross-platform GStreamer TTS sink. K-Balabolka는 이 프로젝트를 학습한 뒤 C/Objective-C로 처음부터 독립 구현했으며 코드를 복사하지 않았습니다(자세한 내용은 [NOTICE § 4](NOTICE) 참고).
+- **설계 참고**: [avstack/gst-ttssink](https://github.com/avstack/gst-ttssink) — Rust 기반 cross-platform GStreamer TTS sink. AnnoySpeaker는 이 프로젝트를 학습한 뒤 C/Objective-C로 처음부터 독립 구현했으며 코드를 복사하지 않았습니다(자세한 내용은 [NOTICE § 4](NOTICE) 참고).
 - **GStreamer**: <https://gstreamer.freedesktop.org/>
