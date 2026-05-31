@@ -1,10 +1,10 @@
-K-Balabolka — Third-Party Notices
+AnnoySpeaker — Third-Party Notices
 ==================================
 
-This file documents the third-party components that K-Balabolka depends on
+This file documents the third-party components that AnnoySpeaker depends on
 or distributes inside its release artifacts (notably the PyInstaller-built
 `.app` bundle of the GUI). The licenses below apply to those third-party
-components only — K-Balabolka's own source code is licensed under the terms
+components only — AnnoySpeaker's own source code is licensed under the terms
 described in the `LICENSE` file at the repository root (LGPL-2.1-or-later
 for `plugin/`; MIT for `gui/` and `tools/`).
 
@@ -47,7 +47,7 @@ Used by:        `gui/` (the PySide6 desktop application). Both PySide6
                 installed into the virtual environment via PyPI and are
                 bundled into the final `.app` release by PyInstaller.
 License:        Qt for Python (PySide6) and Qt are offered under multiple
-                license options. K-Balabolka uses them under the terms of
+                license options. AnnoySpeaker uses them under the terms of
                 the GNU Lesser General Public License version 3
                 (LGPL-3.0-only).
                 The full multi-option SPDX expression observed in the
@@ -88,15 +88,15 @@ License:        Apple system framework; usage governed by the Apple
 § 4. References (design inspiration, no source code copied)
 -----------------------------------------------------------
 
-The following project was studied while designing K-Balabolka's macttssink
-plugin. No source code was copied from it; K-Balabolka's plugin is written
+The following project was studied while designing AnnoySpeaker's macttssink
+plugin. No source code was copied from it; AnnoySpeaker's plugin is written
 from scratch in C / Objective-C. This section is provided for academic
 honesty and traceability, not to discharge any license obligation.
 
 - avstack/gst-ttssink
   Repository: https://github.com/avstack/gst-ttssink
   License:    MIT OR Apache-2.0 (dual-licensed, per its Cargo.toml)
-  Note:       A Rust-based, cross-platform GStreamer TTS sink. K-Balabolka
+  Note:       A Rust-based, cross-platform GStreamer TTS sink. AnnoySpeaker
               was implemented independently in C / Objective-C against the
               same public GStreamer plugin API. The shared structure (a
               `GstBaseSink` subclass with `class_init` / `_init` / `render`)

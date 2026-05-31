@@ -1,6 +1,6 @@
-# K-Balabolka 빌드 가이드
+# AnnoySpeaker 빌드 가이드
 
-이 문서는 K-Balabolka의 세 컴포넌트(`plugin/`, `gui/`, `tools/`)를 macOS에서 처음부터 빌드하고 실행하는 절차를 정리한 문서입니다. 외부 기여자가 깨끗한 환경에서 이 문서만 보고 따라 해도 빌드가 재현되는 것이 목표입니다.
+이 문서는 AnnoySpeaker의 세 컴포넌트(`plugin/`, `gui/`, `tools/`)를 macOS에서 처음부터 빌드하고 실행하는 절차를 정리한 문서입니다. 외부 기여자가 깨끗한 환경에서 이 문서만 보고 따라 해도 빌드가 재현되는 것이 목표입니다.
 
 > **요점만 먼저:** GStreamer는 공식 `.pkg` Framework로 설치하고, plugin을 빌드할 때는 반드시 `PKG_CONFIG_PATH=""` + `PKG_CONFIG_LIBDIR=/Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig` 환경에서 Meson을 실행하세요. 이걸 안 하면 plugin이 빌드는 성공하지만 로드 시점에 `GObject NODE_REFCOUNT` 어설션으로 크래시합니다. 자세한 이유는 [§2.1](#21-왜-pkg_config-우회가-필요한가)에 있습니다.
 
@@ -108,7 +108,7 @@ export GST_PLUGIN_PATH="$(pwd)/../plugin/builddir"
 python main.py
 ```
 
-K-Balabolka 윈도우가 뜨고, 텍스트박스에 한국어/영어 텍스트를 입력해 "재생" 버튼을 누르면 음성이 출력됩니다.
+AnnoySpeaker 윈도우가 뜨고, 텍스트박스에 한국어/영어 텍스트를 입력해 "재생" 버튼을 누르면 음성이 출력됩니다.
 
 ---
 

@@ -33,7 +33,7 @@ Closes #
 - [ ] 변경한 부분의 동작을 직접 확인했다 (재생 / export / GUI 등)
 - [ ] 기존 기능에 회귀가 없음을 확인했다 (해당 시)
 
-## 코드 스타일 — [#11](https://github.com/gstreamer101/K-Balabolka/issues/11)
+## 코드 스타일 — [#11](https://github.com/gstreamer101/AnnoySpeaker/issues/11)
 
 해당하는 파일이 있을 때만 체크.
 

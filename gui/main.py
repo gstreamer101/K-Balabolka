@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 dlgus8648
 
-"""K-Balabolka GUI — PySide6 frontend over macttssink.
+"""AnnoySpeaker GUI — PySide6 frontend over macttssink.
 
 Layout follows the Windows Balabolka style at a high level: toolbar with
 play/stop, an engine info label, rate/pitch/volume sliders, a large text
@@ -152,7 +152,7 @@ class LabeledSlider(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("K-Balabolka")
+        self.setWindowTitle("AnnoySpeaker")
         self.resize(760, 560)
 
         self._process: QProcess | None = None
@@ -463,7 +463,7 @@ class MainWindow(QMainWindow):
 
 def main() -> int:
     app = QApplication(sys.argv)
-    app.setApplicationName("K-Balabolka")
+    app.setApplicationName("AnnoySpeaker")
     window = MainWindow()
     window.show()
     return app.exec()

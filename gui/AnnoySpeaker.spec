@@ -23,7 +23,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='K-Balabolka',
+    name='AnnoySpeaker',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -42,11 +42,11 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='K-Balabolka',
+    name='AnnoySpeaker',
 )
 app = BUNDLE(
     coll,
-    name='K-Balabolka.app',
+    name='AnnoySpeaker.app',
     icon=None,
     bundle_identifier='io.github.gstreamer101.korean-tts',
 )

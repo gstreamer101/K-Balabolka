@@ -227,7 +227,7 @@ gst_mac_tts_sink_class_init (GstMacTtsSinkClass * klass)
       "macOS TTS element",
       "Sink/Text",
       "Sink a text buffer and synthesise speech via macOS AVSpeechSynthesizer",
-      "K-Balabolka <noreply@example.com>");
+      "AnnoySpeaker <noreply@example.com>");
 
   gst_element_class_add_static_pad_template (element_class, &sink_template);
 
@@ -270,5 +270,5 @@ GST_PLUGIN_DEFINE (
     "0.3.0",
     "MIT/Apache-2.0",
     PACKAGE,
-    "https://example.com/k-balabolka"
+    "https://github.com/gstreamer101/AnnoySpeaker"
 )
