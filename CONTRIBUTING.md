@@ -86,11 +86,34 @@ Signed-off-by: Your Name <you@example.com>
 
 ## 3. 코드 스타일
 
-상세한 도구 설정(`.editorconfig`, `ruff` 설정, `.clang-format`)은 별도 작업(상위 이슈 #11)에서 추가될 예정입니다. 그전까지는 다음 방향을 따라주세요.
+스타일은 도구 설정으로 고정되어 있습니다. 에디터에 EditorConfig 지원 플러그인을 설치하면 들여쓰기/줄 끝 문자 등이 자동으로 맞춰집니다.
 
-- **Python (`gui/`)**: PEP 8을 기본으로, 가능하면 `ruff check` / `ruff format`을 통과하는 상태를 유지합니다. 4칸 들여쓰기, 88~100자 줄 폭.
-- **C / Objective-C (`plugin/`, `tools/`)**: GStreamer 코드 컨벤션을 따릅니다(2칸 들여쓰기, `lowercase_with_underscores` 함수/변수, `UpperCamelCase` 타입, `K&R` 중괄호 스타일). 기존 파일들의 스타일을 참고해 일관성을 유지해 주세요.
-- 공통: 의미 있는 변수/함수 이름, 짧은 함수, 외부 동작이 변하지 않는 한 무의미한 형식 변경(re-format)은 별도 PR로 분리.
+### 3.1 도구 설치 (기여 시 필요)
+
+```bash
+brew install ruff clang-format
+```
+
+(빌드 자체에는 필요 없습니다. 기여를 위한 코드 작성/검증 시에만 필요.)
+
+### 3.2 Python (`gui/`)
+
+- 루트 [`ruff.toml`](ruff.toml) 설정 기준. PEP 8 + bugbear + import 정렬 + pyupgrade 룰 셋.
+- 검사: `ruff check gui/`
+- 자동 포맷: `ruff format gui/`
+- PR 제출 전 두 명령이 모두 통과하는 상태를 유지해 주세요.
+
+### 3.3 C / Objective-C (`plugin/`, `tools/`)
+
+- 루트 [`.clang-format`](.clang-format) 설정 기준. GStreamer 코드 컨벤션에 근사 — 2칸 들여쓰기, 80자 줄 폭, K&R brace (함수 정의는 다음 줄), `lowercase_with_underscores`, `UpperCamelCase` 타입, `GstXxx *self` 포인터 정렬.
+- 자동 포맷: `clang-format -i plugin/*.c plugin/*.h plugin/*.m tools/kb-tts-export/*.m`
+- 한 파일 검사만: `clang-format --dry-run --Werror <파일>`
+
+### 3.4 공통
+
+- 의미 있는 변수/함수 이름, 짧은 함수.
+- **외부 동작이 변하지 않는 무의미한 형식 변경(re-format)은 별도 PR로 분리.** 로직 변경과 스타일 변경이 한 PR에 섞이면 리뷰가 어려워집니다.
+- `.editorconfig`로 들여쓰기·줄 끝·trailing whitespace가 통일됩니다 — 별도 신경 쓸 필요 없음.
 
 ---
 

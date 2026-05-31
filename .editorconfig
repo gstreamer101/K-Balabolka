@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 dlgus8648
+#
+# EditorConfig: https://editorconfig.org
+# 모든 모던 에디터(VS Code, JetBrains, Vim/Neovim, Emacs 등)가
+# 자동으로 이 파일을 읽어 들여쓰기/줄 끝 문자 등을 통일합니다.
+
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# Python (gui/)
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+# C / Objective-C (plugin/, tools/) — GStreamer 코드 컨벤션 (2칸)
+[*.{c,h,m}]
+indent_style = space
+indent_size = 2
+max_line_length = 80
+
+# Meson 빌드 스크립트 (plugin/meson.build)
+[meson.build]
+indent_style = space
+indent_size = 2
+
+# Makefile은 탭이 필수 (recipe 라인)
+[Makefile]
+indent_style = tab
+
+# PyInstaller spec (Python 문법)
+[*.spec]
+indent_style = space
+indent_size = 4
+
+# 문서/설정
+[*.{md,yml,yaml,toml,json}]
+indent_style = space
+indent_size = 2
+
+# 마지막 trailing whitespace는 Markdown에서 의미 있음(줄바꿈) → 보존
+[*.md]
+trim_trailing_whitespace = false
