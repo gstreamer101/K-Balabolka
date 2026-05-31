@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 dlgus8648
+#
+# clang-format 설정 — plugin/ 및 tools/ 의 C / Objective-C 코드.
+# 도구 설치:   brew install clang-format
+# 적용:        clang-format -i plugin/*.c plugin/*.h plugin/*.m
+#              clang-format -i tools/kb-tts-export/*.m
+#
+# GStreamer 공식 프로젝트는 .clang-format 대신 자체 GNU indent
+# fork(gst-indent-1.0)를 사용함. 이 설정은 그 결과물에 근사하도록
+# LLVM 베이스에 옵션을 오버라이드한 것.
+#
+# 주요 스타일:
+#  - 들여쓰기 2칸
+#  - 80자 제한
+#  - K&R brace 스타일 (if/for/while 같은 줄, 함수 정의는 다음 줄)
+#  - 반환 타입은 함수 이름과 별도 줄 (예: void\ngst_xxx_init (...))
+#  - 함수 호출/정의의 괄호 앞에 공백 (예: gst_xxx_init (self))
+#  - 포인터 별표는 변수 쪽에 (예: GstXxx *self)
+
+Language: Cpp
+BasedOnStyle: LLVM
+
+IndentWidth: 2
+ContinuationIndentWidth: 4
+ColumnLimit: 80
+TabWidth: 8
+UseTab: Never
+
+# 함수 정의 brace는 다음 줄, if/for/while/switch 등은 같은 줄.
+BreakBeforeBraces: Linux
+
+# 반환 타입은 함수명과 별도 줄로 분리 (GStreamer 스타일).
+AlwaysBreakAfterReturnType: AllDefinitions
+
+# void f (void) 처럼 괄호 앞에 공백.
+SpaceBeforeParens: Always
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# 포인터 별표를 오른쪽(변수)에 붙임: GstXxx *self
+PointerAlignment: Right
+
+# include 정렬은 끄기 (수동 그룹화한 #include 순서 보존).
+SortIncludes: false
+
+# 함수/람다를 짧다고 한 줄에 합치지 않음 — 가독성 우선.
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Empty
+
+# 블록 시작의 빈 줄 제거.
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+
+# 두 줄짜리 주석을 한 줄로 합치지 않음.
+ReflowComments: false
+
+# Objective-C 메소드 호출의 콜론 정렬.
+ObjCBlockIndentWidth: 2
+ObjCSpaceAfterProperty: true
+ObjCSpaceBeforeProtocolList: true

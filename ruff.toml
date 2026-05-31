@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 dlgus8648
+#
+# ruff 설정 — gui/ Python 코드의 린트 + 포맷.
+# 도구 설치:   brew install ruff
+# 검사 실행:   ruff check gui/
+# 포맷 적용:   ruff format gui/
+
+# BUILD.md의 Python 3.10+ 요구와 정합.
+target-version = "py310"
+
+# CONTRIBUTING.md §3에 적은 "88~100자" 범위의 상한.
+line-length = 100
+
+# Ruff가 자동 인식해 검사 대상에서 제외할 디렉터리.
+# (.venv는 ruff 기본값에 포함, gui/build/dist는 PyInstaller 산출물.)
+extend-exclude = [
+    "gui/build",
+    "gui/dist",
+    "plugin/builddir",
+]
+
+[lint]
+# 보수적 룰 셋으로 시작. 점진적으로 추가.
+#   E   — pycodestyle errors (PEP 8 위반)
+#   W   — pycodestyle warnings
+#   F   — pyflakes (논리 오류, 미사용 import 등)
+#   I   — isort (import 정렬)
+#   B   — flake8-bugbear (일반적 함정)
+#   UP  — pyupgrade (구버전 Python 문법 → 신버전)
+select = ["E", "W", "F", "I", "B", "UP"]
+
+# 현재 비워둠. 위반이 너무 많은 룰이 발견되면 여기서 ignore.
+ignore = []
+
+[lint.per-file-ignores]
+# PyInstaller spec 파일은 자체 magic comment(`# -*- coding -*-`)와
+# 정의되지 않은 PyInstaller 전역 함수들(Analysis, PYZ, EXE 등)을 사용함.
+# Ruff가 이것들을 모르므로 검사에서 제외.
+"*.spec" = ["F821"]
+
+[format]
+# 문자열 따옴표 통일.
+quote-style = "double"
+indent-style = "space"
+# 라인 끝 trailing comma 보존.
+skip-magic-trailing-comma = false
