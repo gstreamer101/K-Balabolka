@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 빌드 / 실행 문제 — 먼저 BUILD.md 확인
+    url: https://github.com/gstreamer101/K-Balabolka/blob/main/BUILD.md#6-자주-만나는-문제
+    about: "GLib NODE_REFCOUNT 크래시, plugin 인식 안 됨, 한국어 음성 fallback 등은 BUILD.md의 자주 만나는 문제 절에 해결책이 있습니다."
+
+  - name: 보안 취약점 — 공개 이슈로 올리지 마세요
+    url: https://github.com/gstreamer101/K-Balabolka/security/advisories/new
+    about: "보안 관련 제보는 GitHub Security Advisory의 비공개 경로를 이용해 주세요. 정식 보안 정책(SECURITY.md)은 #15(P2)에서 도입 예정입니다."
