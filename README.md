@@ -9,9 +9,9 @@ macOS용 텍스트 음성 변환 리더. macOS 시스템 음성 합성(AVSpeechS
 
 ---
 
-## 설치 · 빌드 · 실행
+## 설치 · 실행
 
-아래 명령어를 위에서부터 차례로 복사-붙여넣기만 하면 **clone → 빌드 → 실행**까지 한 번에 됩니다. macOS 12 이상이 필요합니다.
+macOS 12 이상에서 **4단계로 끝**납니다. 한 명령으로 빌드 + `.app` 패키징까지 자동.
 
 ### 1) 사전 도구 설치
 
@@ -19,17 +19,18 @@ macOS용 텍스트 음성 변환 리더. macOS 시스템 음성 합성(AVSpeechS
 # Xcode Command Line Tools (clang, make)
 xcode-select --install
 
-# Meson, Ninja, Python (Homebrew 사용)
+# Meson, Ninja, Python (Homebrew)
 brew install meson ninja python@3.12
 ```
 
-그리고 **GStreamer 1.x Framework**를 공식 사이트에서 받아 설치하세요(`.pkg` 두 개를 더블클릭):
+그리고 **GStreamer 1.x Framework**를 공식 사이트에서 받아 설치 (`.pkg` 두 개 더블클릭):
+
 <https://gstreamer.freedesktop.org/download/> 에서
 
 - `gstreamer-1.0-1.x.x-universal.pkg` (Runtime)
 - `gstreamer-1.0-devel-1.x.x-universal.pkg` (Development)
 
-> Homebrew의 `gstreamer`가 아니라 공식 `.pkg` Framework여야 합니다. 이유는 [BUILD.md](BUILD.md)에 자세히 있습니다.
+> Homebrew의 `gstreamer`가 아니라 공식 `.pkg` Framework가 필요합니다. 이유는 [BUILD.md § 2.1](BUILD.md#21-왜-pkg_config-우회가-필요한가)에 있습니다.
 
 ### 2) 저장소 가져오기
 
@@ -38,76 +39,32 @@ git clone https://github.com/gstreamer101/AnnoySpeaker.git
 cd AnnoySpeaker
 ```
 
-### 3) `macttssink` GStreamer 플러그인 빌드
-
-```bash
-cd plugin
-PKG_CONFIG_PATH="" \
-PKG_CONFIG_LIBDIR=/Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig \
-meson setup builddir --reconfigure
-ninja -C builddir
-cd ..
-```
-
-→ `plugin/builddir/gstmacttssink.dylib` 가 생성됩니다.
-
-### 4) GUI 실행
-
-```bash
-cd gui
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-GST_PLUGIN_PATH="$(pwd)/../plugin/builddir" python main.py
-```
-
-AnnoySpeaker 윈도우가 뜨면 텍스트박스에 한국어/영어를 입력하고 "재생"을 눌러보세요.
-
-### 5) (옵션) m4a 내보내기 도구 빌드
-
-GUI에서 m4a 내보내기를 쓰려면 export 도구를 함께 빌드하세요.
-
-```bash
-cd tools/kb-tts-export
-make
-cd ../..
-```
-
-### 6) 동작 확인 (CLI)
-
-GUI 없이 plugin이 잘 동작하는지 빠르게 검증:
-
-```bash
-echo "안녕하세요, 케이 발라볼카 입니다" | \
-  GST_PLUGIN_PATH="$(pwd)/plugin/builddir" \
-  gst-launch-1.0 --quiet fdsrc ! 'text/x-raw,format=utf8' ! macttssink
-```
-
-스피커에서 음성이 들리면 OK.
-
-### 7) (옵션) `.app`으로 패키징해서 venv 없이 더블클릭 실행
-
-매번 `source .venv/bin/activate && python main.py` 하기 번거롭다면, PyInstaller로 `.app` 번들을 만들어 두면 됩니다 — Python 인터프리터와 PySide6를 `.app` 안에 묶기 때문에 venv 활성화 없이 더블클릭만으로 실행됩니다.
-
-위 1)~5)를 마친 상태에서 한 명령으로:
+### 3) 한 명령으로 빌드 + `.app` 패키징
 
 ```bash
 ./scripts/setup-dev.sh --build-app
 ```
 
-또는 수동으로:
+이 한 명령이:
+
+- 사전 도구 점검
+- `macttssink` GStreamer 플러그인 빌드 (`plugin/builddir/gstmacttssink.dylib`)
+- GUI 가상환경 + PySide6/PyInstaller 설치
+- m4a 내보내기 도구 빌드 (`tools/kb-tts-export`)
+- PyInstaller로 `.app` 빌드 (Python 인터프리터·PySide6·plugin .dylib·export 도구 모두 `.app` 안에 묶음)
+
+까지 자동으로 수행해 `gui/dist/AnnoySpeaker.app` (≈ 103MB) 을 만듭니다. 몇 분 소요.
+
+### 4) 실행
 
 ```bash
-cd gui && source .venv/bin/activate && pyinstaller --noconfirm AnnoySpeaker.spec && cd ..
-```
-
-→ `gui/dist/AnnoySpeaker.app` 생성. `/Applications`으로 복사하면 Launchpad / Spotlight에서 검색 가능:
-
-```bash
+# Applications에 복사 (Launchpad / Spotlight에서 검색 가능)
 cp -R gui/dist/AnnoySpeaker.app /Applications/
 ```
 
-또는 빌드 직후 바로 실행:
+그 다음 **Launchpad에서 "AnnoySpeaker" 검색하거나 Applications 폴더에서 더블클릭**.
+
+또는 빌드 직후 바로 실행만 하고 싶다면:
 
 ```bash
 open gui/dist/AnnoySpeaker.app
@@ -117,11 +74,11 @@ open gui/dist/AnnoySpeaker.app
 
 ---
 
-## 막혔을 때
+## 막혔을 때 / 더 자세히
 
-- 빌드/실행 중 `GObject: NODE_REFCOUNT` 같은 크래시나 "plugin이 인식 안 됨"이 나오면 → **[BUILD.md "자주 만나는 문제"](BUILD.md#6-자주-만나는-문제)** 절을 먼저 보세요.
-- 위 명령어가 왜 이렇게 되어 있는지(특히 `PKG_CONFIG_PATH=""` 우회) 궁금하면 → **[BUILD.md § 2.1](BUILD.md#21-왜-pkg_config-우회가-필요한가)** 에 원리가 정리되어 있습니다.
-- Homebrew GStreamer나 직접 소스 빌드한 GStreamer를 쓰고 싶다면 → **[BUILD.md § 2.3](BUILD.md#23-다른-gstreamer-설치를-쓰는-경우-검증되지-않음)** 의 fallback 안내를 참고하세요(검증되지 않은 경로).
+- **빌드/실행 중 에러** (예: `GObject: NODE_REFCOUNT` 크래시, "plugin 인식 안 됨", 한국어 음성이 영어로 나옴 등) → [BUILD.md "자주 만나는 문제"](BUILD.md#6-자주-만나는-문제)
+- **수동으로 단계별 빌드하고 싶거나 코드를 수정해 venv에서 직접 실행하려면** → [BUILD.md](BUILD.md)에 plugin 빌드(§2)·GUI venv 실행(§3)·동작 확인 CLI(§5) 전체 절차가 있습니다.
+- **다른 GStreamer 출처**(Homebrew, 직접 소스 빌드 등)를 쓰고 싶으면 → [BUILD.md § 2.3](BUILD.md#23-다른-gstreamer-설치를-쓰는-경우-검증되지-않음) (검증되지 않은 경로)
 
 ---
 
