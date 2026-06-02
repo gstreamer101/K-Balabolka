@@ -1045,7 +1045,7 @@ def _selftest() -> int:
 
     fd, path = tempfile.mkstemp(suffix=".txt", prefix="selftest-")
     with os.fdopen(fd, "wb") as f:
-        f.write("자가진단 문장 하나 둘 셋".encode("utf-8"))
+        f.write("자가진단 문장 하나 둘 셋".encode())
     player.play(path, ENGINES[0].sink_element, 0.5, 1.0, 1.0, None)
     QTimer.singleShot(12000, app.quit)
     app.exec()
