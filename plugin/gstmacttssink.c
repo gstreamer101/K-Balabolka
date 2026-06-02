@@ -137,6 +137,36 @@ gst_mac_tts_sink_stop (GstBaseSink * sink)
   return TRUE;
 }
 
+/* render()가 mac_tts_speak()에서 동기 블록 대기 중일 때, 상태 변경(정지/
+ * flush)으로 빠져나와야 하면 basesink가 unlock()을 부른다. 현재 발화를
+ * 즉시 취소해 블록된 render()가 리턴하도록 한다 (구현 안 하면 in-process
+ * 정지가 데드락). 컨텍스트는 부수지 않음(정리는 stop()에서). */
+static gboolean
+gst_mac_tts_sink_unlock (GstBaseSink * sink)
+{
+  GstMacTtsSink *self = GST_MAC_TTS_SINK (sink);
+  GST_DEBUG_OBJECT (self, "unlock()");
+  if (self->tts) {
+    mac_tts_cancel (self->tts);
+  }
+  return TRUE;
+}
+
+/* mac_tts_speak가 각 단어를 말하기 직전 호출. 단어 범위(읽는 문자열의
+ * UTF-16 코드유닛 기준)를 "annoyspeaker-word" element 메시지로 버스에 post.
+ * GUI(인프로세스 PyGObject)가 버스를 폴링해 실시간 하이라이트에 사용. */
+static void
+gst_mac_tts_sink_on_word (void *user_data, guint start, guint length)
+{
+  GstMacTtsSink *self = GST_MAC_TTS_SINK (user_data);
+  gst_element_post_message (GST_ELEMENT (self),
+      gst_message_new_element (GST_OBJECT (self),
+          gst_structure_new ("annoyspeaker-word",
+              "start", G_TYPE_UINT, start,
+              "end", G_TYPE_UINT, start + length,
+              NULL)));
+}
+
 static GstFlowReturn
 gst_mac_tts_sink_render (GstBaseSink * sink, GstBuffer * buffer)
 {
@@ -173,16 +203,45 @@ gst_mac_tts_sink_render (GstBaseSink * sink, GstBuffer * buffer)
         strlen (text), opts.rate, opts.pitch, opts.volume,
         opts.voice_id ? opts.voice_id : "(default)", text);
 
-    if (self->tts && mac_tts_speak (self->tts, text, &opts) != 0) {
+    if (self->tts && mac_tts_speak (self->tts, text, &opts,
+            gst_mac_tts_sink_on_word, self) != 0) {
       GST_WARNING_OBJECT (self, "mac_tts_speak() failed for: %s", text);
     }
   } else {
     GST_DEBUG_OBJECT (self, "empty/whitespace-only text buffer, skipping");
   }
 
+  /* 이 버퍼(=utterance) 합성 완료를 GUI에 알림. 인프로세스 재생에서
+   * EOS+blocking 타이밍에 의존하지 않고 "재생 끝"을 인지하게 한다.
+   * (현재 GUI는 텍스트 전체를 1버퍼로 보내므로 done도 1회.) */
+  gst_element_post_message (GST_ELEMENT (self),
+      gst_message_new_element (GST_OBJECT (self),
+          gst_structure_new_empty ("annoyspeaker-done")));
+
   g_free (text);
   gst_buffer_unmap (buffer, &map);
   return GST_FLOW_OK;
+}
+
+/* --- action signals: pause / resume --------------------------------------- */
+
+/* GUI가 element.emit("pause"/"resume")로 호출 (G_SIGNAL_ACTION).
+ * render()가 스트리밍 스레드에서 블록 대기 중일 때 GUI 스레드에서 불려
+ * 합성기를 단어 경계에서 멈추거나 재개한다. */
+static void
+gst_mac_tts_sink_pause (GstMacTtsSink * self)
+{
+  if (self->tts) {
+    mac_tts_pause (self->tts);
+  }
+}
+
+static void
+gst_mac_tts_sink_resume (GstMacTtsSink * self)
+{
+  if (self->tts) {
+    mac_tts_resume (self->tts);
+  }
 }
 
 /* --- class / instance init ------------------------------------------------ */
@@ -231,6 +290,17 @@ gst_mac_tts_sink_class_init (GstMacTtsSinkClass * klass)
 
   gst_element_class_add_static_pad_template (element_class, &sink_template);
 
+  /* GUI가 호출할 일시정지/재개 액션 시그널 */
+  g_signal_new_class_handler ("pause", G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+      G_CALLBACK (gst_mac_tts_sink_pause), NULL, NULL, NULL,
+      G_TYPE_NONE, 0);
+  g_signal_new_class_handler ("resume", G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+      G_CALLBACK (gst_mac_tts_sink_resume), NULL, NULL, NULL,
+      G_TYPE_NONE, 0);
+
+  base_sink_class->unlock = GST_DEBUG_FUNCPTR (gst_mac_tts_sink_unlock);
   base_sink_class->start  = GST_DEBUG_FUNCPTR (gst_mac_tts_sink_start);
   base_sink_class->stop   = GST_DEBUG_FUNCPTR (gst_mac_tts_sink_stop);
   base_sink_class->render = GST_DEBUG_FUNCPTR (gst_mac_tts_sink_render);
