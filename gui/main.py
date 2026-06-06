@@ -39,6 +39,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QPlainTextEdit,
+    QProgressDialog,
     QSlider,
     QStatusBar,
     QStyle,
@@ -511,6 +512,9 @@ class MainWindow(QMainWindow):
         self.resize(760, 560)
 
         self._export_process: QProcess | None = None
+        self._export_dialog: QProgressDialog | None = None
+        self._export_buf: str = ""  # stderr 줄바꿈 경계 버퍼
+        self._export_canceled: bool = False
         self._tmp_text_path: str | None = None
         self._current_engine: Engine = ENGINES[0]
         self._has_voices: bool = False
@@ -920,7 +924,10 @@ class MainWindow(QMainWindow):
             lambda code, status, p=path: self._on_export_finished(p, code, status)
         )
         proc.errorOccurred.connect(self._on_error)
+        proc.readyReadStandardOutput.connect(self._on_export_output)
 
+        self._export_buf = ""
+        self._export_canceled = False
         self._export_process = proc
         proc.start(str(export_tool), args)
         if not proc.waitForStarted(3000):
@@ -931,10 +938,64 @@ class MainWindow(QMainWindow):
         proc.write(text.encode("utf-8"))
         proc.closeWriteChannel()
 
+        # 변환이 끝날 때까지 텍스트 입력을 막고 진행률을 모달로 표시
         self.export_action.setEnabled(False)
         self.engine_combo.setEnabled(False)
         self.voice_combo.setEnabled(False)
+        self.text_edit.setReadOnly(True)
+
+        # 총 청크 수를 아직 모르므로 0~0(바쁨 표시)로 시작 → "Encoding N" 수신 시 확정
+        dlg = QProgressDialog("내보내기 준비 중…", "취소", 0, 0, self)
+        dlg.setWindowTitle("음성 파일로 저장")
+        dlg.setWindowModality(Qt.WindowModality.WindowModal)
+        dlg.setMinimumDuration(0)
+        dlg.setAutoClose(False)
+        dlg.setAutoReset(False)
+        dlg.canceled.connect(self._on_export_cancel)
+        self._export_dialog = dlg
+        dlg.show()
         self.status_label.setText(f"내보내는 중… → {path}")
+
+    def _on_export_output(self) -> None:
+        """kb-tts-export의 stderr(병합됨)를 줄 단위로 읽어 진행률 갱신."""
+        proc = self._export_process
+        if proc is None:
+            return
+        self._export_buf += bytes(proc.readAllStandardOutput()).decode("utf-8", "replace")
+        *lines, self._export_buf = self._export_buf.split("\n")
+        for line in lines:
+            self._parse_export_line(line)
+
+    def _parse_export_line(self, line: str) -> None:
+        dlg = self._export_dialog
+        if dlg is None:
+            return
+        m = re.search(r"Encoding (\d+) chunk", line)
+        if m:
+            total = int(m.group(1))
+            dlg.setRange(0, total)
+            dlg.setValue(0)
+            dlg.setLabelText(f"음성 합성 중…  0/{total}")
+            return
+        m = re.search(r"\.\.\. (\d+)/(\d+) chunks", line)
+        if m:
+            done, total = int(m.group(1)), int(m.group(2))
+            if total:
+                dlg.setRange(0, total)
+                dlg.setValue(done)
+                pct = round(done * 100 / total)
+                dlg.setLabelText(f"음성 합성 중…  {done}/{total} ({pct}%)")
+            return
+        if "Converting WAV" in line:
+            # 마지막 m4a 인코딩 단계 — 길이를 알 수 없어 바쁨 표시로 전환
+            dlg.setRange(0, 0)
+            dlg.setLabelText("오디오 인코딩 중…  (m4a)")
+
+    def _on_export_cancel(self) -> None:
+        self._export_canceled = True
+        proc = self._export_process
+        if proc is not None:
+            proc.kill()  # finished 콜백에서 미완성 파일 정리
 
     def _on_export_finished(
         self, path: str, exit_code: int, exit_status: QProcess.ExitStatus
@@ -943,6 +1004,28 @@ class MainWindow(QMainWindow):
         self.export_action.setEnabled(True)
         self.engine_combo.setEnabled(True)
         self.voice_combo.setEnabled(self._has_voices)
+        self.text_edit.setReadOnly(False)
+        # 취소 여부를 먼저 확정한 뒤 다이얼로그를 닫는다. close()가 canceled를
+        # 재발생시켜 정상 완료를 취소로 오인(→ 파일 삭제)하지 않도록 시그널을
+        # 끊고 플래그도 로컬에 캡처한다.
+        canceled = self._export_canceled
+        self._export_canceled = False
+        if self._export_dialog is not None:
+            dlg = self._export_dialog
+            self._export_dialog = None
+            dlg.canceled.disconnect(self._on_export_cancel)
+            dlg.close()
+
+        if canceled:
+            # 사용자가 취소 → 미완성 산출물(.m4a, 임시 .wav) 정리
+            for p in (path, path + ".tmp.wav"):
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
+            self.status_label.setText("내보내기 취소됨")
+            return
+
         if exit_status == QProcess.ExitStatus.CrashExit:
             self.status_label.setText("내보내기 중단됨")
         elif exit_code != 0:
@@ -1011,6 +1094,8 @@ class MainWindow(QMainWindow):
 
     def _on_error(self, err: QProcess.ProcessError) -> None:
         # 내보내기(QProcess) 에러 경로
+        if self._export_canceled:
+            return  # 취소로 인한 kill — finished 콜백이 정리/상태표시 담당
         self._fail(f"프로세스 에러: {err}")
 
     def _fail(self, message: str) -> None:

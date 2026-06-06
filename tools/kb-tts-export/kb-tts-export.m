@@ -389,9 +389,9 @@ main (int argc, const char *argv[])
         return 1;
       }
       done_count++;
-      if (done_count % 10 == 0 || done_count == total) {
-        fprintf (stderr, "  ... %d/%d chunks\n", done_count, total);
-      }
+      /* 매 청크마다 진행률 출력 — GUI 진행률 다이얼로그가 부드럽게 갱신되도록 */
+      fprintf (stderr, "  ... %d/%d chunks\n", done_count, total);
+      fflush (stderr);
     }
 
     wav_file = nil;  /* ARC가 close + flush. WAV는 close 시 헤더가 안전히 갱신됨. */
