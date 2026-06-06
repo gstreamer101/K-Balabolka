@@ -7,10 +7,9 @@
 # 1차 CI(ci.yml, Linux)는 모든 PR에서 린트·순수 단위 테스트를 빠르게 돌린다.
 # 여기서는 그게 검증 못 하는 것(네이티브 빌드, 플러그인/도구 런타임 테스트)을 본다.
 #
-# 범위: plugin(meson/ninja) + tools(make) 빌드 + pytest. PyInstaller .app
-# 패키징은 PyGObject 번들링이 러너 환경에 민감해(로컬과 다른 gir/dyld 경로)
-# 여기선 다루지 않는다 — #13의 ".app은 가능하면" 항목으로, 별도 후속 과제.
-# (.app은 로컬 `./scripts/setup-dev.sh --build-app`로 검증한다.)
+# 범위: plugin(meson/ninja) + tools(make) + PyInstaller .app 패키징 + pytest.
+# .app의 PyGObject 번들링은 framework dylib 경로(DYLD_FALLBACK_LIBRARY_PATH)가
+# 필요한데 setup-dev.sh가 빌드 시점에 그걸 주도록 고쳐 CI에서도 패키징된다.
 
 name: macOS full build
 
@@ -74,17 +73,18 @@ jobs:
           echo "$GST_FRAMEWORK_BIN" >> "$GITHUB_PATH"
 
       # 재현 가능한 빌드 절차(BUILD.md/setup-dev.sh)를 그대로 사용:
-      # meson/ninja plugin 빌드 + tools(make). --no-gui로 GUI venv·.app은 생략
-      # (PyInstaller .app은 후속 과제). --install-deps: meson/ninja brew 설치.
-      - name: Build native (plugin + tools)
-        run: ./scripts/setup-dev.sh --no-gui --install-deps
+      # meson/ninja plugin + GUI venv + tools(make) + PyInstaller .app.
+      # --no-install: /Applications 복사 생략, --install-deps: meson/ninja brew 설치.
+      - name: Full build (plugin + tools + .app)
+        run: ./scripts/setup-dev.sh --build-app --no-install --install-deps
 
       - name: Verify build artifacts
         run: |
           set -euo pipefail
           test -f plugin/builddir/gstmacttssink.dylib
           test -x tools/kb-tts-export/kb-tts-export
-          echo "✅ plugin dylib · export tool 생성됨"
+          test -d gui/dist/AnnoySpeaker.app
+          echo "✅ plugin dylib · export tool · .app 모두 생성됨"
 
       # 1차 CI에서 skip되던 네이티브 테스트(gst-inspect 속성, --list-voices)를
       # 여기서 실제로 돌린다. 단 라이브 AVSpeech 합성이 필요한 테스트(avspeech
