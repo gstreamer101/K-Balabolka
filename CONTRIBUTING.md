@@ -132,9 +132,13 @@ GStreamer/AVSpeech·PySide6 없이 돌며 1초 내 끝납니다.
 
 ### 4.2 무엇이 테스트되나
 
+테스트 항목 전체 목록(각 테스트가 어떤 기능을 무엇을 기준으로 검증하는지)은 **[`tests/README.md`](tests/README.md) 테스트 카탈로그**에 정리돼 있습니다. 요약:
+
 - `gui/textproc.py` — 전처리, 읽기 문자열+offset_map, 속도 곡선 (`tests/test_textproc.py`)
 - `gui/voices.py` — `--list-voices` 파싱·필터·기본 선택 (`tests/test_voices.py`)
 - 네이티브 도구/플러그인 — `kb-tts-export` m4a 내보내기, `gst-inspect` 속성 (`tests/test_plugin_cli.py`). **도구·GStreamer가 없는 환경에서는 자동 skip**되고, macOS에서 빌드 후 실행됩니다.
+
+**테스트를 추가/변경하면 `tests/README.md`의 표도 함께 갱신**해 주세요(추가 방법은 그 문서의 "테스트 케이스를 추가하는 법" 참고).
 
 ### 4.3 한계 — 자동화할 수 없는 것
 
