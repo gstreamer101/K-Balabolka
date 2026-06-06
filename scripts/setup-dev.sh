@@ -322,10 +322,15 @@ if (( BUILD_APP )); then
       exit 1
     fi
     note "PyInstaller 실행 중 (.app에 plugin .dylib과 export 도구를 함께 묶습니다)..."
-    # PyGObject(gi) 수집 시 PyInstaller 훅이 framework의 typelib(.typelib)과
-    # GIR(.gir)을 찾아야 한다. 시스템 GStreamer.framework 경로를 알려준다.
+    # PyGObject(gi) 수집 시 PyInstaller 훅이 framework의 typelib(.typelib)·GIR(.gir)과
+    # 그 typelib이 가리키는 공유 라이브러리(libgobject/libgio 등)를 모두 찾아야 한다.
+    # XDG_DATA_DIRS/GI_TYPELIB_PATH로 데이터 경로를, DYLD_FALLBACK_LIBRARY_PATH로
+    # dylib 경로를 준다. DYLD가 없으면 gi 훅의 get_libdir이 ctypes로 libgio-2.0을
+    # 못 찾아 빌드가 깨진다(깨끗한 환경/CI에서 발생). 런타임 _setup_gstreamer_env와 동일.
     FW=/Library/Frameworks/GStreamer.framework/Versions/1.0
-    XDG_DATA_DIRS="$FW/share" GI_TYPELIB_PATH="$FW/lib/girepository-1.0" \
+    XDG_DATA_DIRS="$FW/share" \
+    GI_TYPELIB_PATH="$FW/lib/girepository-1.0" \
+    DYLD_FALLBACK_LIBRARY_PATH="$FW/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}" \
       pyinstaller --noconfirm --log-level=WARN AnnoySpeaker.spec
   )
 
